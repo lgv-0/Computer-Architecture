@@ -72,6 +72,8 @@ class CPU:
         PRN = 0b01000111
         HLT = 0b00000001
         MUL = 0b10100010
+        PUSH = 0b01000101
+        POP = 0b01000110
 
         self.running = True
 
@@ -87,5 +89,16 @@ class CPU:
                 self.running = False
             if command == MUL:
                 self.alu("MUL", self.ram[self.pc + 1], self.ram[self.pc + 2])
+            if command == PUSH:
+                self.reg[7] -= 1
+                sp = self.reg[7]
+                reg_index = self.ram[self.pc + 1]
+                self.ram[sp] = self.reg[reg_index]
+            if command == POP:
+                sp = self.reg[7]
+                popped_value = self.ram[sp]
+                reg_index = self.ram[self.pc + 1]
+                self.reg[reg_index] = popped_value
+                self.reg[7] += 1
             
             self.pc += 1 + (command >> 6)
