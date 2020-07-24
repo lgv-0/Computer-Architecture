@@ -64,16 +64,17 @@ class CPU:
         for i in range(8):
             print(" %02X" % self.reg[i], end='')
 
-        print()
-
     def run(self):
         """Run the CPU."""
         LDI = 0b10000010
         PRN = 0b01000111
         HLT = 0b00000001
         MUL = 0b10100010
+        ADD = 0b10100000
         PUSH = 0b01000101
         POP = 0b01000110
+        CALL = 0b01010000
+        RET = 0b00010001
 
         self.running = True
 
@@ -100,5 +101,20 @@ class CPU:
                 reg_index = self.ram[self.pc + 1]
                 self.reg[reg_index] = popped_value
                 self.reg[7] += 1
+            if command == CALL:
+                reg_idx = self.ram[self.pc + 1]
+                jump_address = self.reg[reg_idx]
+                return_address = self.pc + 2
+                self.reg[7] -= 1
+                sp = self.reg[7]
+                self.ram[sp] = return_address
+                self.pc = jump_address
+                continue
+            if command == RET:
+                sp = self.reg[7]
+                return_address = self.ram[sp]
+                self.reg[7] += 1
+                self.pc = return_address
+                continue
             
             self.pc += 1 + (command >> 6)
